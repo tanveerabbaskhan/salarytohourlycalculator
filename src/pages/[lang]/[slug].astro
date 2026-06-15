@@ -1,0 +1,27 @@
+---
+import { SUPPORTED_LANGUAGES } from '../../config/languages';
+import { getPagePaths } from '../../config/paths';
+
+export async function getStaticPaths() {
+  const paths: any[] = [];
+  
+  // Generate calculator pages for all languages except English (which is at root /)
+  SUPPORTED_LANGUAGES.filter(language => language !== 'en').forEach(language => {
+    const pagePaths = getPagePaths(language);
+    paths.push({
+      params: { lang: language, slug: pagePaths.slug },
+      props: { language, isCalculator: true },
+    });
+  });
+
+  return paths;
+}
+
+interface Props {
+  language: string;
+}
+
+const { language } = Astro.props as Props;
+const target = getPagePaths(language).home;
+return Astro.redirect(target, 301);
+---

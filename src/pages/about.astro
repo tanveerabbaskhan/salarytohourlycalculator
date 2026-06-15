@@ -1,0 +1,14 @@
+---
+import AboutPage from '../components/AboutPage.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getHomepageContent } from '../content/homepage';
+
+const language = 'en';
+const content = getHomepageContent(language);
+const title = `About | ${content.title}`;
+const description = content.aboutText;
+---
+
+<BaseLayout language={language} title={title} description={description} canonical="/about/" hreflangGroup="none">
+  <AboutPage language={language} />
+</BaseLayout>

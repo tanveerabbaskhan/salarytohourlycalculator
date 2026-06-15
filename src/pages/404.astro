@@ -1,0 +1,118 @@
+---
+/**
+ * 404 Not Found Page
+ * Custom error page for missing content
+ */
+
+import { DEFAULT_LANGUAGE } from '../config/languages';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const language = DEFAULT_LANGUAGE;
+---
+
+<BaseLayout language={language} title="404 - Page Not Found">
+  <div class="error-container">
+    <h1 class="error-code">404</h1>
+    <h2 class="error-title">Page Not Found</h2>
+    <p class="error-message">
+      Sorry, the page you're looking for doesn't exist. Please check the URL and try again.
+    </p>
+    <div class="error-actions">
+      <a href="/" class="btn-primary">Go Home</a>
+      <a href="/" class="btn-secondary">Go to Calculator</a>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    padding: var(--spacing-xl);
+  }
+
+  .error-code {
+    font-size: 6rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    line-height: 1;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .error-title {
+    font-size: var(--font-size-2xl);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .error-message {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-light);
+    margin-bottom: var(--spacing-2xl);
+    max-width: 500px;
+  }
+
+  .error-actions {
+    display: flex;
+    gap: var(--spacing-lg);
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    display: inline-block;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+  }
+
+  .btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--color-primary-dark);
+  }
+
+  .btn-secondary {
+    border: 2px solid var(--color-primary);
+    color: var(--color-primary);
+    background-color: transparent;
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-primary);
+    color: white;
+  }
+
+  @media (max-width: 768px) {
+    .error-code {
+      font-size: 4rem;
+    }
+
+    .error-title {
+      font-size: var(--font-size-xl);
+    }
+
+    .error-message {
+      font-size: var(--font-size-base);
+    }
+
+    .error-actions {
+      gap: var(--spacing-md);
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      padding: var(--spacing-md);
+      font-size: var(--font-size-sm);
+    }
+  }
+</style>

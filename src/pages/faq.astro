@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const title = 'FAQ | Salary to Hourly Calculator';
+const description = 'Answers to common salary conversion questions, including work hours, taxes, benefits, and overtime.';
+---
+
+<BaseLayout language="en" title={title} description={description} canonical="/faq/" hreflangGroup="none">
+  <article class="page-content">
+    <h1>Frequently Asked Questions</h1>
+
+    <section>
+      <h2>How do you convert annual salary to hourly pay?</h2>
+      <p>
+        Divide the annual salary by annual work hours. With a 40-hour week, the standard
+        assumption is 2,080 hours per year.
+      </p>
+    </section>
+
+    <section>
+      <h2>Does the calculator include taxes?</h2>
+      <p>
+        No. It shows gross pay before taxes, insurance, retirement contributions, or other deductions.
+      </p>
+    </section>
+
+    <section>
+      <h2>Can I change weekly hours?</h2>
+      <p>
+        Yes. Change the hours-per-week field before entering a wage, or adjust it afterward to
+        recalculate the values.
+      </p>
+    </section>
+
+    <section>
+      <h2>Does it handle overtime?</h2>
+      <p>
+        It shows base pay conversion only. Overtime rules vary by location and employer, so calculate
+        overtime separately when needed.
+      </p>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .page-content {
+    max-width: 820px;
+    margin: 0 auto;
+    line-height: 1.8;
+  }
+
+  .page-content h1 {
+    font-size: var(--font-size-3xl);
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .page-content section {
+    padding: var(--spacing-lg) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .page-content p {
+    color: var(--color-text-light);
+  }
+</style>

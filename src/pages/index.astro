@@ -1,0 +1,44 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProfessionalHomepage from '../components/ProfessionalHomepage.astro';
+import { getHomepageContent } from '../content/homepage';
+import { SUPPORTED_LANGUAGES } from '../config/languages';
+import { getPagePaths } from '../config/paths';
+import { generateCalculatorSchema, generateFAQSchema } from '../utils/seo';
+
+const language = 'en';
+const content = getHomepageContent(language);
+const languageRedirects = Object.fromEntries(
+  SUPPORTED_LANGUAGES.map(code => [code, code === 'en' ? '/' : `/${code}/`])
+);
+const calculatorSchema = generateCalculatorSchema(language);
+const faqSchema = generateFAQSchema(content.faqs);
+---
+
+<BaseLayout
+  language={language}
+  title={content.title}
+  description={content.description}
+  canonical="/"
+>
+  <script is:inline define:vars={{ languageRedirects }}>
+    (() => {
+      // Check for stored language preference
+      const preferredLanguage = localStorage.getItem('salarytohourly-language');
+      const browserLanguage = navigator.language?.split('-')[0];
+      const targetLanguage = preferredLanguage || browserLanguage;
+
+      // If user has a language preference and it's not English, redirect to that language homepage
+      if (targetLanguage && targetLanguage !== 'en' && languageRedirects[targetLanguage]) {
+        const nextPath = languageRedirects[targetLanguage];
+        if (nextPath && nextPath !== '/' && window.location.pathname === '/') {
+          window.location.replace(nextPath);
+        }
+      }
+    })();
+  </script>
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(calculatorSchema)} />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+  <ProfessionalHomepage language={language} />
+</BaseLayout>

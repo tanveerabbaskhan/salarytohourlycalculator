@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const title = 'Privacy Policy | Salary to Hourly Calculator';
+const description = 'Privacy policy for Salary to Hourly Calculator.';
+---
+
+<BaseLayout language="en" title={title} description={description} canonical="/privacy/" hreflangGroup="none">
+  <article class="page-content">
+    <h1>Privacy Policy</h1>
+    <p>
+      Salary to Hourly Calculator is designed to be simple and privacy-friendly. The calculator
+      runs in your browser and does not require an account.
+    </p>
+    <h2>Information we collect</h2>
+    <p>
+      We do not ask you to submit personal information to use the calculator. If analytics or
+      advertising tools are enabled in the future, they may collect standard usage information
+      such as pages visited, device type, and browser details.
+    </p>
+    <h2>Calculator inputs</h2>
+    <p>
+      Wage amounts, currency choices, and weekly hours are used only to show calculations in your
+      browser. Do not enter sensitive personal financial data that you do not want visible on screen.
+    </p>
+    <h2>Contact</h2>
+    <p>
+      For privacy questions, contact support@salarytohourly.com.
+    </p>
+  </article>
+</BaseLayout>
+
+<style>
+  .page-content {
+    max-width: 820px;
+    margin: 0 auto;
+    line-height: 1.8;
+  }
+
+  .page-content h1 {
+    font-size: var(--font-size-3xl);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .page-content h2 {
+    margin-top: var(--spacing-xl);
+  }
+
+  .page-content p {
+    color: var(--color-text-light);
+  }
+</style>

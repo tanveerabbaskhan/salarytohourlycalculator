@@ -1,0 +1,100 @@
+---
+import { getHomepageContent } from '../content/homepage';
+
+interface Props {
+  language: string;
+}
+
+const { language } = Astro.props as Props;
+const content = getHomepageContent(language);
+---
+
+<article class="page-content">
+  <p class="section-kicker">{content.aboutKicker}</p>
+  <h1>{content.aboutTitle}</h1>
+  <p>{content.aboutText}</p>
+
+  <div class="about-facts">
+    {content.aboutFacts.map(item => (
+      <section>
+        <h2>{item.title}</h2>
+        <p>{item.text}</p>
+      </section>
+    ))}
+  </div>
+
+  <h2>{content.usersTitle}</h2>
+  <p>{content.usersIntro}</p>
+  <div class="user-grid">
+    {content.users.map(item => (
+      <section>
+        <h3>{item.title}</h3>
+        <p>{item.text}</p>
+      </section>
+    ))}
+  </div>
+</article>
+
+<style>
+  .page-content {
+    max-width: 920px;
+    margin: 0 auto;
+    line-height: 1.8;
+  }
+
+  .section-kicker {
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .page-content h1 {
+    margin-bottom: var(--spacing-lg);
+    font-size: var(--font-size-3xl);
+  }
+
+  .page-content h2 {
+    margin-top: var(--spacing-xl);
+    font-size: var(--font-size-2xl);
+  }
+
+  .page-content h3 {
+    margin-bottom: var(--spacing-sm);
+    font-size: var(--font-size-lg);
+  }
+
+  .page-content p {
+    color: var(--color-text-light);
+  }
+
+  .about-facts,
+  .user-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+  }
+
+  .about-facts section,
+  .user-grid section {
+    padding: var(--spacing-lg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    background: var(--color-bg-light);
+  }
+
+  .about-facts h2 {
+    margin-top: 0;
+    font-size: var(--font-size-lg);
+  }
+
+  @media (max-width: 768px) {
+    .about-facts,
+    .user-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

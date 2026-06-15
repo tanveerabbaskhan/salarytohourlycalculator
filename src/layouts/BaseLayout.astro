@@ -1,0 +1,445 @@
+---
+/**
+ * Base Layout Component for Astro
+ * Handles SEO, metadata, and language-aware rendering
+ */
+
+import { SITE_CONFIG } from '../config/site';
+import { SUPPORTED_LANGUAGES, getLanguageConfig } from '../config/languages';
+import { getPagePaths } from '../config/paths';
+import { generateHreflangLinks, generatePageMetadata } from '../utils/seo';
+
+interface Props {
+  language: string;
+  title?: string;
+  description?: string;
+  canonical?: string;
+  hreflangGroup?: 'calculator' | 'none';
+}
+
+const {
+  language,
+  title,
+  description,
+  canonical,
+  hreflangGroup = 'calculator',
+} = Astro.props as Props;
+
+// Get language-specific configuration
+const langConfig = getLanguageConfig(language);
+const pagePaths = getPagePaths(language);
+const languageOptions = SUPPORTED_LANGUAGES.map(code => ({
+  code,
+  language: getLanguageConfig(code),
+  path: getPagePaths(code),
+}));
+const homeHref = language === 'en' ? '/' : pagePaths.home;
+const aboutHref = language === 'en' ? '/about/' : `/${language}/about/`;
+const navLabels = {
+  en: { calculator: 'Calculator', about: 'About', home: 'Home', faq: 'FAQ', contact: 'Contact', privacy: 'Privacy Policy', terms: 'Terms of Service' },
+  es: { calculator: 'Calculadora', about: 'Acerca de', home: 'Inicio', faq: 'FAQ', contact: 'Contacto', privacy: 'Política de privacidad', terms: 'Términos de servicio' },
+  pt: { calculator: 'Calculadora', about: 'Sobre', home: 'Início', faq: 'FAQ', contact: 'Contato', privacy: 'Política de privacidade', terms: 'Termos de serviço' },
+  fr: { calculator: 'Calculateur', about: 'À propos', home: 'Accueil', faq: 'FAQ', contact: 'Contact', privacy: 'Politique de confidentialité', terms: 'Conditions d’utilisation' },
+  de: { calculator: 'Rechner', about: 'Über uns', home: 'Startseite', faq: 'FAQ', contact: 'Kontakt', privacy: 'Datenschutz', terms: 'Nutzungsbedingungen' },
+  ja: { calculator: '計算機', about: '概要', home: 'ホーム', faq: 'FAQ', contact: 'お問い合わせ', privacy: 'プライバシーポリシー', terms: '利用規約' },
+  zh: { calculator: '计算器', about: '关于', home: '首页', faq: 'FAQ', contact: '联系', privacy: '隐私政策', terms: '服务条款' },
+  id: { calculator: 'Kalkulator', about: 'Tentang', home: 'Beranda', faq: 'FAQ', contact: 'Kontak', privacy: 'Kebijakan privasi', terms: 'Ketentuan layanan' },
+  tr: { calculator: 'Hesaplayıcı', about: 'Hakkında', home: 'Ana sayfa', faq: 'SSS', contact: 'İletişim', privacy: 'Gizlilik politikası', terms: 'Hizmet şartları' },
+  ru: { calculator: 'Калькулятор', about: 'О нас', home: 'Главная', faq: 'FAQ', contact: 'Контакты', privacy: 'Политика конфиденциальности', terms: 'Условия использования' },
+  it: { calculator: 'Calcolatore', about: 'Informazioni', home: 'Home', faq: 'FAQ', contact: 'Contatto', privacy: 'Privacy', terms: 'Termini di servizio' },
+  nl: { calculator: 'Calculator', about: 'Over', home: 'Home', faq: 'FAQ', contact: 'Contact', privacy: 'Privacybeleid', terms: 'Servicevoorwaarden' },
+  pl: { calculator: 'Kalkulator', about: 'O nas', home: 'Strona główna', faq: 'FAQ', contact: 'Kontakt', privacy: 'Polityka prywatności', terms: 'Warunki korzystania' },
+  ko: { calculator: '계산기', about: '소개', home: '홈', faq: 'FAQ', contact: '문의', privacy: '개인정보 처리방침', terms: '서비스 약관' },
+}[language] || {
+  calculator: 'Calculator',
+  about: 'About',
+  home: 'Home',
+  faq: 'FAQ',
+  contact: 'Contact',
+  privacy: 'Privacy Policy',
+  terms: 'Terms of Service',
+};
+
+// Use custom or default metadata
+const pageTitle = title || pagePaths.title;
+const pageDescription = description || pagePaths.metaDescription;
+const pageCanonical = canonical || pagePaths.calculator;
+
+// Generate metadata
+const metadata = generatePageMetadata(
+  pageTitle,
+  pageDescription,
+  pageCanonical,
+  language,
+  SITE_CONFIG.baseUrl
+);
+
+// Generate hreflang links
+const hreflangLinks = hreflangGroup === 'calculator'
+  ? generateHreflangLinks(pageCanonical, language, SITE_CONFIG.baseUrl)
+  : [];
+
+// Get base URL for this page
+const baseUrl = `${SITE_CONFIG.baseUrl}${pageCanonical}`;
+---
+
+<!DOCTYPE html>
+<html lang={langConfig.locale} dir={langConfig.direction}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Title and Description -->
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <meta name="robots" content="index, follow" />
+    <meta name="google-site-verification" content="g8wDMwsPduzYRiZispV2ps7G9uHeS3avvuR8P6w46rc" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href={metadata.canonical} />
+    
+    <!-- Language Alternates (hreflang) -->
+    {hreflangLinks.map((link) => (
+      <link
+        rel={link.rel}
+        hreflang={link.hrefLang}
+        href={link.href}
+      />
+    ))}
+    
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content={metadata.og?.title || pageTitle} />
+    <meta property="og:description" content={metadata.og?.description || pageDescription} />
+    <meta property="og:image" content={metadata.og?.image || SITE_CONFIG.socialImage} />
+    <meta property="og:url" content={metadata.og?.url || baseUrl} />
+    <meta property="og:type" content={metadata.og?.type || 'website'} />
+    <meta property="og:locale" content={langConfig.locale} />
+    
+    <!-- Twitter Tags -->
+    <meta name="twitter:card" content={metadata.twitter?.card || 'summary_large_image'} />
+    <meta name="twitter:title" content={metadata.twitter?.title || pageTitle} />
+    <meta name="twitter:description" content={metadata.twitter?.description || pageDescription} />
+    <meta name="twitter:image" content={metadata.twitter?.image || SITE_CONFIG.socialImage} />
+    {SITE_CONFIG.twitterHandle && (
+      <meta name="twitter:creator" content={SITE_CONFIG.twitterHandle} />
+    )}
+    
+    <!-- Additional Meta Tags -->
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/styles/global.css" />
+    <link rel="stylesheet" href="/styles/calculator.css" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    
+    <!-- Preload Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    
+    <!-- Analytics (if configured) -->
+    {SITE_CONFIG.googleAnalyticsId && (
+      <>
+        <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${SITE_CONFIG.googleAnalyticsId}`}></script>
+        <script is:inline define:vars={{ googleAnalyticsId: SITE_CONFIG.googleAnalyticsId }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', googleAnalyticsId);
+        </script>
+      </>
+    )}
+  </head>
+  <body>
+    <!-- Skip to Main Content -->
+    <a href="#main-content" class="skip-to-main">Skip to main content</a>
+    
+    <!-- Header -->
+    <header class="site-header">
+      <div class="container">
+        <div class="header-content">
+          <a class="site-title" href="/">{SITE_CONFIG.siteName}</a>
+          <div class="header-actions">
+            <nav class="primary-nav" aria-label="Primary navigation">
+              <a href={homeHref}>{navLabels.calculator}</a>
+              <a href={aboutHref}>{navLabels.about}</a>
+              <a href="/faq/">{navLabels.faq}</a>
+              <a href="/contact/">{navLabels.contact}</a>
+            </nav>
+            <nav class="language-selector" aria-label="Language selection">
+              <select
+                id="language-select"
+                onchange="localStorage.setItem('salarytohourly-language', this.options[this.selectedIndex].dataset.lang || 'en'); window.location.href = this.value"
+                aria-label="Select language and open translated calculator page"
+              >
+                {languageOptions.map(option => (
+                  <option value={option.code === 'en' ? '/' : option.path.home} data-lang={option.code} selected={language === option.code}>
+                    {option.language.nativeName}
+                  </option>
+                ))}
+              </select>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main id="main-content" class="site-main">
+      <div class="container">
+        <slot />
+      </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-content">
+          <p>&copy; {new Date().getFullYear()} {SITE_CONFIG.organization.name}. All rights reserved.</p>
+          <nav class="footer-links">
+            <a href={homeHref}>{navLabels.home}</a>
+            <a href={aboutHref}>{navLabels.about}</a>
+            <a href="/faq/">{navLabels.faq}</a>
+            <a href="/privacy/">{navLabels.privacy}</a>
+            <a href="/terms/">{navLabels.terms}</a>
+            <a href="/contact/">{navLabels.contact}</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+    
+    <!-- Scripts -->
+    <script is:inline>
+      // Minimal inline script to prevent layout shift
+      // Check for dark mode preference
+      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  :root {
+    --color-primary: #3b82f6;
+    --color-primary-dark: #1e40af;
+    --color-secondary: #8b5cf6;
+    --color-text: #1f2937;
+    --color-text-light: #6b7280;
+    --color-bg: #ffffff;
+    --color-bg-light: #f9fafb;
+    --color-border: #e5e7eb;
+    --color-error: #ef4444;
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+
+    --border-radius: 0.5rem;
+    --border-radius-lg: 0.75rem;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
+
+  html.dark {
+    --color-text: #f3f4f6;
+    --color-text-light: #d1d5db;
+    --color-bg: #111827;
+    --color-bg-light: #1f2937;
+    --color-border: #374151;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+    color: var(--color-text);
+    background-color: var(--color-bg);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+  }
+
+  .skip-to-main {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--color-primary);
+    color: white;
+    padding: var(--spacing-sm) var(--spacing-md);
+    text-decoration: none;
+    z-index: 100;
+  }
+
+  .skip-to-main:focus {
+    top: 0;
+  }
+
+  .site-header {
+    background-color: var(--color-bg-light);
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--spacing-lg) 0;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-lg);
+  }
+
+  .site-title {
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .site-title:hover {
+    color: var(--color-primary);
+    text-decoration: none;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+  }
+
+  .primary-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+  }
+
+  .primary-nav a {
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .primary-nav a:hover {
+    color: var(--color-primary);
+  }
+
+  .language-selector select {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-family);
+    cursor: pointer;
+  }
+
+  .site-main {
+    min-height: calc(100vh - 200px);
+    padding: var(--spacing-2xl) 0;
+  }
+
+  .site-footer {
+    background-color: var(--color-bg-light);
+    border-top: 1px solid var(--color-border);
+    padding: var(--spacing-xl) 0;
+    margin-top: var(--spacing-2xl);
+  }
+
+  .footer-content {
+    text-align: center;
+  }
+
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-md);
+    flex-wrap: wrap;
+  }
+
+  .footer-links a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+  }
+
+  .footer-links a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    .header-content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--spacing-md);
+    }
+
+    .header-actions {
+      width: 100%;
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--spacing-md);
+    }
+
+    .primary-nav {
+      width: 100%;
+      justify-content: space-between;
+      gap: var(--spacing-sm);
+      overflow-x: auto;
+    }
+
+    .site-title {
+      font-size: var(--font-size-xl);
+    }
+
+    .language-selector select {
+      width: 100%;
+    }
+  }
+</style>

@@ -1,0 +1,32 @@
+---
+import AboutPage from '../../components/AboutPage.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SUPPORTED_LANGUAGES, isSupportedLanguage } from '../../config/languages';
+import { getHomepageContent } from '../../content/homepage';
+
+export function getStaticPaths() {
+  return SUPPORTED_LANGUAGES.filter(language => language !== 'en').map(language => ({
+    params: { lang: language },
+    props: { language },
+  }));
+}
+
+interface Props {
+  language: string;
+}
+
+const { language } = Astro.props as Props;
+
+if (!isSupportedLanguage(language)) {
+  return Astro.redirect('/');
+}
+
+const content = getHomepageContent(language);
+const title = `${content.aboutTitle} | ${content.title}`;
+const description = content.aboutText;
+const canonical = `/${language}/about/`;
+---
+
+<BaseLayout language={language} title={title} description={description} canonical={canonical} hreflangGroup="none">
+  <AboutPage language={language} />
+</BaseLayout>

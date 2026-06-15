@@ -1,0 +1,24 @@
+{
+  "name": "salarytohourly",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "pages:dev": "npm run build && set XDG_CONFIG_HOME=.wrangler-config&& wrangler pages dev dist",
+    "pages:deploy": "npm run build && set XDG_CONFIG_HOME=.wrangler-config&& wrangler pages deploy dist --project-name salarytohourly",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^6.4.6"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "typescript": "^6.0.3",
+    "wrangler": "^4.100.0"
+  }
+}

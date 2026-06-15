@@ -1,0 +1,53 @@
+---
+/**
+ * Multilingual Homepage
+ * Generates homepage for all supported languages
+ */
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProfessionalHomepage from '../../components/ProfessionalHomepage.astro';
+import { getHomepageContent } from '../../content/homepage';
+import { SUPPORTED_LANGUAGES, isSupportedLanguage } from '../../config/languages';
+import { getPagePaths } from '../../config/paths';
+import { generateCalculatorSchema, generateFAQSchema } from '../../utils/seo';
+
+export function getStaticPaths() {
+  return SUPPORTED_LANGUAGES.filter(language => language !== 'en').map((language) => ({
+    params: { lang: language },
+    props: { language },
+  }));
+}
+
+interface Props {
+  language: string;
+}
+
+const { language } = Astro.props as Props;
+
+// Validate language
+if (!isSupportedLanguage(language)) {
+  return Astro.redirect('/');
+}
+
+const content = getHomepageContent(language);
+const calculatorSchema = generateCalculatorSchema(language);
+const faqSchema = generateFAQSchema(content.faqs);
+
+// Determine canonical URL
+const baseUrl = 'https://salarytohourly.com';
+const canonicalUrl = `${baseUrl}/${language}/`;
+---
+
+<BaseLayout
+  language={language}
+  title={content.title}
+  description={content.description}
+  canonical={canonicalUrl}
+>
+  <!-- Structured Data -->
+  <script type="application/ld+json" set:html={JSON.stringify(calculatorSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+  <!-- Multilingual Homepage Component -->
+  <ProfessionalHomepage language={language} />
+</BaseLayout>

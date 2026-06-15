@@ -1,0 +1,438 @@
+---
+import { CURRENCIES, getCurrencyConfig } from '../config/currencies';
+import type { LocalizationStrings } from '../i18n/localization';
+
+interface Props {
+  currency: string;
+  strings: LocalizationStrings;
+  language?: string;
+}
+
+const { currency = 'USD', strings, language = 'en' } = Astro.props as Props;
+const currencyConfig = getCurrencyConfig(currency);
+const currencyOptions = Object.values(CURRENCIES);
+const quickCurrencies = ['USD', 'EUR', 'GBP', 'INR', 'JPY'];
+const weeksLabels: Record<string, string> = {
+  en: 'Weeks worked per year',
+  es: 'Semanas trabajadas por año',
+  pt: 'Semanas trabalhadas por ano',
+  fr: 'Semaines travaillées par an',
+  de: 'Arbeitswochen pro Jahr',
+  ja: '年間の勤務週数',
+  zh: '每年工作周数',
+  id: 'Minggu kerja per tahun',
+  tr: 'Yılda çalışılan hafta',
+  ru: 'Рабочих недель в году',
+  it: 'Settimane lavorate all’anno',
+  nl: 'Gewerkte weken per jaar',
+  pl: 'Przepracowane tygodnie rocznie',
+  ko: '연간 근무 주수',
+};
+const weeksLabel = weeksLabels[language] || weeksLabels.en;
+---
+
+<div class="simple-calculator" data-salary-calculator>
+  <div class="currency-tabs" aria-label={strings.currency}>
+    {quickCurrencies.map(code => {
+      const option = getCurrencyConfig(code);
+      return (
+        <button
+          type="button"
+          class:list={['currency-tab', code === currency && 'active']}
+          data-currency-tab={code}
+          data-symbol={option.symbol}
+          data-decimals={option.decimals}
+        >
+          {option.symbol}
+        </button>
+      );
+    })}
+  </div>
+
+  <div class="calculator-panel">
+    <div class="form-stack">
+      <div class="field-group salary-row">
+        <label for="salaryAmount">{strings.annualSalary}</label>
+        <div class="amount-control">
+          <span data-currency-symbol>{currencyConfig.symbol}</span>
+          <input id="salaryAmount" type="number" inputmode="decimal" min="0" value="40000" data-amount />
+        </div>
+        <select aria-label="Pay period" data-period>
+          <option value="annual" selected>{strings.annualSalary}</option>
+          <option value="monthly">{strings.monthlyWage}</option>
+          <option value="biweekly">{strings.biweeklyWage}</option>
+          <option value="weekly">{strings.weeklyWage}</option>
+          <option value="daily">{strings.dailyWage}</option>
+          <option value="hourly">{strings.hourlyWage}</option>
+        </select>
+      </div>
+
+      <div class="field-grid">
+        <div class="field-group">
+          <label for="hoursPerWeek">{strings.hoursPerWeek}</label>
+          <input id="hoursPerWeek" type="number" inputmode="decimal" min="1" max="168" step="0.5" value="40" data-hours />
+        </div>
+        <div class="field-group">
+          <label for="weeksPerYear">{weeksLabel}</label>
+          <input id="weeksPerYear" type="number" inputmode="decimal" min="1" max="52" step="1" value="52" data-weeks />
+        </div>
+      </div>
+
+      <div class="advanced-currency">
+        <label for="currencySelect">{strings.currency}</label>
+        <select id="currencySelect" data-currency>
+          {currencyOptions.map(option => (
+            <option
+              value={option.code}
+              data-symbol={option.symbol}
+              data-decimals={option.decimals}
+              selected={option.code === currency}
+            >
+              {option.code} - {option.name}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+
+    <aside class="result-panel" aria-label={strings.resultsAria}>
+      <p>{strings.yourWageAs}</p>
+      <strong data-main-result>--</strong>
+      <div class="result-list">
+        <div><span>{strings.hourlyWage}</span><b data-result="hourly">--</b></div>
+        <div><span>{strings.dailyWage}</span><b data-result="daily">--</b></div>
+        <div><span>{strings.weeklyWage}</span><b data-result="weekly">--</b></div>
+        <div><span>{strings.biweeklyWage}</span><b data-result="biweekly">--</b></div>
+        <div><span>{strings.monthlyWage}</span><b data-result="monthly">--</b></div>
+        <div><span>{strings.annualSalary}</span><b data-result="annual">--</b></div>
+        <div><span>{strings.perMinute}</span><b data-result="perMinute">--</b></div>
+        <div><span>{strings.perSecond}</span><b data-result="perSecond">--</b></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script is:inline>
+  (() => {
+    const root = document.querySelector('[data-salary-calculator]');
+    if (!root) return;
+
+    const amountInput = root.querySelector('[data-amount]');
+    const periodSelect = root.querySelector('[data-period]');
+    const hoursInput = root.querySelector('[data-hours]');
+    const weeksInput = root.querySelector('[data-weeks]');
+    const currencySelect = root.querySelector('[data-currency]');
+    const currencyTabs = Array.from(root.querySelectorAll('[data-currency-tab]'));
+    const currencySymbols = Array.from(root.querySelectorAll('[data-currency-symbol]'));
+    const resultNodes = Array.from(root.querySelectorAll('[data-result]'));
+    const mainResult = root.querySelector('[data-main-result]');
+
+    const clamp = (value, min, max, fallback) => {
+      const number = Number.parseFloat(value);
+      if (Number.isNaN(number)) return fallback;
+      return Math.min(max, Math.max(min, number));
+    };
+
+    const getCurrencyMeta = () => {
+      const selected = currencySelect.selectedOptions[0];
+      return {
+        code: currencySelect.value || 'USD',
+        symbol: selected?.dataset.symbol || currencySelect.value || '$',
+        decimals: Number.parseInt(selected?.dataset.decimals || '2', 10),
+      };
+    };
+
+    const formatCurrency = value => {
+      const meta = getCurrencyMeta();
+      return new Intl.NumberFormat(undefined, {
+        style: 'currency',
+        currency: meta.code,
+        minimumFractionDigits: meta.decimals,
+        maximumFractionDigits: meta.decimals,
+      }).format(value);
+    };
+
+    const toHourly = (amount, period, hours, weeks) => {
+      const daysPerWeek = 5;
+      switch (period) {
+        case 'hourly': return amount;
+        case 'daily': return amount / (hours / daysPerWeek);
+        case 'weekly': return amount / hours;
+        case 'biweekly': return amount / (hours * 2);
+        case 'monthly': return (amount * 12) / (hours * weeks);
+        case 'annual':
+        default: return amount / (hours * weeks);
+      }
+    };
+
+    const fromHourly = (hourly, period, hours, weeks) => {
+      const daysPerWeek = 5;
+      switch (period) {
+        case 'hourly': return hourly;
+        case 'daily': return hourly * (hours / daysPerWeek);
+        case 'weekly': return hourly * hours;
+        case 'biweekly': return hourly * hours * 2;
+        case 'monthly': return (hourly * hours * weeks) / 12;
+        case 'annual': return hourly * hours * weeks;
+        case 'perMinute': return hourly / 60;
+        case 'perSecond': return hourly / 3600;
+        default: return 0;
+      }
+    };
+
+    const syncCurrencyUi = () => {
+      const meta = getCurrencyMeta();
+      currencySymbols.forEach(node => {
+        node.textContent = meta.symbol;
+      });
+      currencyTabs.forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.currencyTab === meta.code);
+      });
+    };
+
+    const calculate = () => {
+      const amount = Number.parseFloat(amountInput.value);
+      const hours = clamp(hoursInput.value, 1, 168, 40);
+      const weeks = clamp(weeksInput.value, 1, 52, 52);
+
+      if (Number.isNaN(amount) || amount <= 0) {
+        resultNodes.forEach(node => {
+          node.textContent = '--';
+        });
+        mainResult.textContent = '--';
+        return;
+      }
+
+      const hourly = toHourly(amount, periodSelect.value, hours, weeks);
+      const results = {
+        hourly,
+        daily: fromHourly(hourly, 'daily', hours, weeks),
+        weekly: fromHourly(hourly, 'weekly', hours, weeks),
+        biweekly: fromHourly(hourly, 'biweekly', hours, weeks),
+        monthly: fromHourly(hourly, 'monthly', hours, weeks),
+        annual: fromHourly(hourly, 'annual', hours, weeks),
+        perMinute: fromHourly(hourly, 'perMinute', hours, weeks),
+        perSecond: fromHourly(hourly, 'perSecond', hours, weeks),
+      };
+
+      resultNodes.forEach(node => {
+        node.textContent = formatCurrency(results[node.dataset.result]);
+      });
+      mainResult.textContent = `${formatCurrency(hourly)} / hr`;
+    };
+
+    currencyTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        currencySelect.value = tab.dataset.currencyTab;
+        syncCurrencyUi();
+        calculate();
+      });
+    });
+
+    [amountInput, periodSelect, hoursInput, weeksInput, currencySelect].forEach(control => {
+      control.addEventListener('input', () => {
+        syncCurrencyUi();
+        calculate();
+      });
+      control.addEventListener('change', () => {
+        syncCurrencyUi();
+        calculate();
+      });
+    });
+
+    syncCurrencyUi();
+    calculate();
+  })();
+</script>
+
+<style>
+  .simple-calculator {
+    max-width: 860px;
+    margin: 0 auto;
+    color: var(--color-text);
+  }
+
+  .currency-tabs {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    background: var(--color-bg);
+  }
+
+  .currency-tab {
+    min-height: 58px;
+    border: 0;
+    border-right: 1px solid var(--color-border);
+    border-radius: 0;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-size: var(--font-size-xl);
+    font-weight: 800;
+  }
+
+  .currency-tab:last-child {
+    border-right: 0;
+  }
+
+  .currency-tab.active {
+    background: var(--color-primary);
+    color: #fff;
+  }
+
+  .calculator-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.85fr);
+    gap: var(--spacing-xl);
+    margin-top: var(--spacing-lg);
+  }
+
+  .form-stack,
+  .result-panel {
+    padding: var(--spacing-lg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    background: var(--color-bg);
+  }
+
+  .form-stack {
+    display: grid;
+    gap: var(--spacing-lg);
+  }
+
+  .field-group {
+    display: grid;
+    gap: var(--spacing-sm);
+  }
+
+  .field-group label,
+  .advanced-currency label {
+    font-weight: 800;
+  }
+
+  .salary-row {
+    grid-template-columns: minmax(0, 1fr) minmax(150px, 190px);
+    align-items: end;
+  }
+
+  .salary-row label {
+    grid-column: 1 / -1;
+  }
+
+  .amount-control {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    background: var(--color-bg-light);
+  }
+
+  .amount-control span {
+    display: grid;
+    place-items: center;
+    border-right: 1px solid var(--color-border);
+    font-size: var(--font-size-xl);
+    font-weight: 800;
+  }
+
+  .amount-control input,
+  .field-group input,
+  .salary-row select,
+  .advanced-currency select {
+    min-height: 58px;
+    width: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    background: var(--color-bg-light);
+    color: var(--color-text);
+    font-size: 1.2rem;
+  }
+
+  .amount-control input {
+    border: 0;
+    border-radius: 0;
+    font-size: 1.45rem;
+  }
+
+  .field-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacing-md);
+  }
+
+  .advanced-currency {
+    display: grid;
+    gap: var(--spacing-sm);
+  }
+
+  .result-panel {
+    display: grid;
+    gap: var(--spacing-md);
+    align-content: start;
+  }
+
+  .result-panel p {
+    margin: 0;
+    color: var(--color-text-light);
+    font-weight: 800;
+  }
+
+  .result-panel > strong {
+    display: block;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--color-primary-dark);
+    font-size: var(--font-size-2xl);
+    line-height: 1.1;
+  }
+
+  .result-list {
+    display: grid;
+    gap: var(--spacing-sm);
+  }
+
+  .result-list div {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .result-list span {
+    color: var(--color-text-light);
+  }
+
+  .result-list b {
+    text-align: right;
+  }
+
+  @media (max-width: 768px) {
+    .currency-tabs {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .calculator-panel,
+    .salary-row,
+    .field-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .form-stack,
+    .result-panel {
+      padding: var(--spacing-md);
+    }
+
+    .currency-tab,
+    .amount-control input,
+    .field-group input,
+    .salary-row select,
+    .advanced-currency select {
+      min-height: 52px;
+      font-size: 16px;
+    }
+  }
+</style>

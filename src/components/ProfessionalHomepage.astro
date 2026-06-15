@@ -1,0 +1,552 @@
+---
+import SalaryCalculator from './SalaryCalculator.astro';
+import { getLocalization } from '../i18n/localization';
+import { getHomepageContent, salaryRows } from '../content/homepage';
+
+interface Props {
+  language: string;
+}
+
+const { language } = Astro.props as Props;
+const strings = getLocalization(language);
+const content = getHomepageContent(language);
+---
+
+<section class="homepage-hero" id="calculator">
+  <div class="hero-copy">
+    <p class="eyebrow">{content.eyebrow}</p>
+    <h1>{content.h1}</h1>
+    <p class="subheadline">{content.subheadline}</p>
+  </div>
+
+  <div id="calculator-widget" class="calculator-shell" aria-label={strings.calculatorAria}>
+    <SalaryCalculator currency="USD" strings={strings} language={language} />
+  </div>
+
+  <div class="support-band" aria-label={content.supportLabel}>
+    <strong>{content.supportLabel}</strong>
+    {content.supportItems.map(item => <span>{item}</span>)}
+  </div>
+  <p class="currency-line">{content.currencyLine}</p>
+</section>
+
+<section class="trust-grid" aria-label="Trust summary">
+  {content.trust.map(item => (
+    <article>
+      <strong>{item.title}</strong>
+      <span>{item.text}</span>
+    </article>
+  ))}
+</section>
+
+<main class="homepage-content">
+  <section class="feature-panel">
+    <div>
+      <p class="section-kicker">{content.aboutKicker}</p>
+      <h2>{content.aboutTitle}</h2>
+      <p>{content.aboutText}</p>
+    </div>
+    <div class="mini-card-stack">
+      {content.aboutFacts.map(item => (
+        <article>
+          <strong>{item.title}</strong>
+          <span>{item.text}</span>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>{content.whyTitle}</h2>
+    {content.whyText.map(paragraph => <p>{paragraph}</p>)}
+    <h3>{content.usersTitle}</h3>
+    <p>{content.usersIntro}</p>
+    <div class="card-grid three">
+      {content.users.map(item => (
+        <article>
+          <h4>{item.title}</h4>
+          <p>{item.text}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>{content.howTitle}</h2>
+    <p>{content.howIntro}</p>
+    <div class="step-grid">
+      {content.steps.map((step, index) => (
+        <article>
+          <span>{index + 1}</span>
+          <h3>{step.title}</h3>
+          <p>{step.text}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>{content.formulasTitle}</h2>
+    <p>{content.formulasIntro}</p>
+    <div class="card-grid two">
+      {content.formulas.map(item => (
+        <article>
+          <h3>{item.title}</h3>
+          <code>{item.text}</code>
+        </article>
+      ))}
+    </div>
+    <div class="callout">
+      <h3>{content.trueRateTitle}</h3>
+      <p>{content.trueRateText}</p>
+    </div>
+  </section>
+
+  <section class="content-section" id="conversion-chart">
+    <h2>{content.chartTitle}</h2>
+    <p>{content.chartIntro}</p>
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>{content.chartHeaders.map(header => <th>{header}</th>)}</tr>
+        </thead>
+        <tbody>
+          {salaryRows.map(row => (
+            <tr>{row.map(cell => <td>{cell}</td>)}</tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p class="note">{content.chartNote}</p>
+  </section>
+
+  <section class="content-section">
+    <h2>{content.compareTitle}</h2>
+    <p>{content.compareIntro}</p>
+    <div class="card-grid two">
+      {content.comparison.map(item => (
+        <article>
+          <h3>{item.title}</h3>
+          <p>{item.text}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>{content.scenariosTitle}</h2>
+    <div class="card-grid two">
+      {content.scenarios.map(item => (
+        <article>
+          <h3>{item.title}</h3>
+          <p>{item.text}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>{content.globalTitle}</h2>
+    <p>{content.globalIntro}</p>
+    <div class="hours-grid">
+      {content.globalHours.map(item => (
+        <div>
+          <strong>{item.title}</strong>
+          <span>{item.text}</span>
+        </div>
+      ))}
+    </div>
+    <p>{content.globalOutro}</p>
+  </section>
+
+  <section class="content-section faq-section">
+    <h2>{content.faqTitle}</h2>
+    {content.faqs.map(item => (
+      <details>
+        <summary>{item.question}</summary>
+        <p>{item.answer}</p>
+      </details>
+    ))}
+  </section>
+
+  <section class="content-section">
+    <h2>{content.relatedTitle}</h2>
+    <p>{content.relatedIntro}</p>
+    <div class="card-grid two">
+      {content.related.map(item => (
+        <article>
+          <h3>{item.title}</h3>
+          <p>{item.text}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="closing-panel">
+    <h2>{content.closingTitle}</h2>
+    <p>{content.closingText}</p>
+    <a href="#calculator">{content.primaryCta}</a>
+  </section>
+
+  <section class="footer-note">
+    <h2>{content.footerTitle}</h2>
+    <p>{content.footerText}</p>
+  </section>
+</main>
+
+<style>
+  .homepage-hero {
+    display: grid;
+    gap: var(--spacing-xl);
+  }
+
+  .hero-copy {
+    max-width: 980px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .eyebrow,
+  .section-kicker {
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    max-width: 980px;
+    margin-bottom: var(--spacing-lg);
+    font-size: clamp(2.15rem, 4vw, 4.5rem);
+    line-height: 1.02;
+    letter-spacing: 0;
+  }
+
+  .subheadline {
+    max-width: 780px;
+    margin-inline: auto;
+    color: var(--color-text-light);
+    font-size: var(--font-size-lg);
+    line-height: 1.75;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+  }
+
+  .button-primary,
+  .button-secondary,
+  .closing-panel a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 var(--spacing-lg);
+    border-radius: var(--border-radius);
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .button-primary,
+  .closing-panel a {
+    background: var(--color-primary);
+    color: #fff;
+  }
+
+  .button-secondary {
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    background: var(--color-bg);
+  }
+
+  .calculator-shell {
+    padding: var(--spacing-xl);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    background: var(--color-bg-light);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .support-band {
+    display: grid;
+    grid-template-columns: 120px repeat(8, minmax(0, 1fr));
+    gap: var(--spacing-sm);
+    align-items: center;
+  }
+
+  .support-band strong,
+  .support-band span {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--spacing-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    background: var(--color-bg);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .support-band strong {
+    background: var(--color-primary);
+    color: #fff;
+  }
+
+  .currency-line {
+    margin: 0;
+    color: var(--color-text-light);
+    text-align: center;
+  }
+
+  .trust-grid,
+  .card-grid,
+  .step-grid,
+  .hours-grid {
+    display: grid;
+    gap: var(--spacing-md);
+  }
+
+  .trust-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    margin: var(--spacing-2xl) 0;
+  }
+
+  .trust-grid article,
+  .card-grid article,
+  .step-grid article,
+  .hours-grid div,
+  .mini-card-stack article,
+  .callout,
+  .faq-section details {
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    background: var(--color-bg-light);
+    padding: var(--spacing-lg);
+  }
+
+  .trust-grid strong,
+  .trust-grid span,
+  .hours-grid strong,
+  .hours-grid span,
+  .mini-card-stack strong,
+  .mini-card-stack span {
+    display: block;
+  }
+
+  .trust-grid span,
+  .hours-grid span,
+  .mini-card-stack span,
+  .card-grid p,
+  .step-grid p,
+  .content-section p,
+  .footer-note p,
+  .closing-panel p {
+    color: var(--color-text-light);
+  }
+
+  .homepage-content {
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+
+  .feature-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(300px, 1.05fr);
+    gap: var(--spacing-xl);
+    align-items: start;
+    padding: var(--spacing-xl);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    background: var(--color-bg-light);
+  }
+
+  .feature-panel h2,
+  .content-section h2,
+  .closing-panel h2,
+  .footer-note h2 {
+    font-size: var(--font-size-2xl);
+    letter-spacing: 0;
+  }
+
+  .mini-card-stack {
+    display: grid;
+    gap: var(--spacing-md);
+  }
+
+  .mini-card-stack article {
+    background: var(--color-bg);
+  }
+
+  .content-section,
+  .footer-note {
+    margin-top: var(--spacing-2xl);
+    padding-top: var(--spacing-xl);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .content-section > p,
+  .footer-note p {
+    max-width: 880px;
+    line-height: 1.8;
+  }
+
+  .content-section h3 {
+    margin-top: var(--spacing-xl);
+  }
+
+  .card-grid.two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .card-grid.three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .card-grid article h3,
+  .card-grid article h4,
+  .step-grid article h3 {
+    margin-bottom: var(--spacing-sm);
+    font-size: var(--font-size-lg);
+  }
+
+  .step-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: var(--spacing-lg);
+  }
+
+  .step-grid span {
+    display: inline-grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    margin-bottom: var(--spacing-md);
+    border-radius: 999px;
+    background: var(--color-primary);
+    color: #fff;
+    font-weight: 800;
+  }
+
+  .callout {
+    margin-top: var(--spacing-lg);
+    background: rgba(16, 185, 129, 0.08);
+  }
+
+  .table-card {
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    background: var(--color-bg);
+  }
+
+  .table-card table {
+    min-width: 680px;
+    margin: 0;
+  }
+
+  .table-card th {
+    background: var(--color-primary-dark);
+    color: #fff;
+  }
+
+  .table-card tbody tr:nth-child(even) {
+    background: var(--color-bg-light);
+  }
+
+  .note {
+    margin-top: var(--spacing-md);
+    font-size: var(--font-size-sm);
+  }
+
+  .hours-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .faq-section details {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .faq-section summary {
+    cursor: pointer;
+    font-weight: 800;
+  }
+
+  .faq-section details p {
+    margin: var(--spacing-md) 0 0;
+  }
+
+  .closing-panel {
+    margin-top: var(--spacing-2xl);
+    padding: var(--spacing-2xl);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    background:
+      linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(16, 185, 129, 0.1)),
+      var(--color-bg-light);
+    text-align: center;
+  }
+
+  .closing-panel p {
+    max-width: 720px;
+    margin-inline: auto;
+  }
+
+  @media (max-width: 1100px) {
+    .support-band {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .trust-grid,
+    .hours-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .step-grid,
+    .card-grid.three {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 768px) {
+    .feature-panel,
+    .trust-grid,
+    .card-grid.two,
+    .card-grid.three,
+    .step-grid,
+    .hours-grid,
+    .support-band {
+      grid-template-columns: 1fr;
+    }
+
+    .hero-actions {
+      flex-direction: column;
+    }
+
+    .button-primary,
+    .button-secondary {
+      width: 100%;
+    }
+
+    .calculator-shell,
+    .feature-panel,
+    .closing-panel {
+      padding: var(--spacing-lg);
+    }
+
+    h1 {
+      font-size: 2.25rem;
+    }
+
+    .currency-line,
+    .closing-panel,
+    .hero-copy {
+      text-align: left;
+    }
+  }
+</style>
