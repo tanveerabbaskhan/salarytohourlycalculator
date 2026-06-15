@@ -5,12 +5,10 @@
 
 export const SITE_CONFIG = {
   // Base URL for the website
-  // Auto-detects Vercel/Cloudflare URLs, or use PUBLIC_SITE_URL env var to override
-  // Falls back to production domain
-  baseUrl: import.meta.env.PUBLIC_SITE_URL 
-    || (import.meta.env.VERCEL_URL ? `https://${import.meta.env.VERCEL_URL}` : null)
-    || (import.meta.env.CF_PAGES_URL ? `https://${import.meta.env.CF_PAGES_URL}` : null)
-    || 'https://salarytohourly.com',
+  // Set PUBLIC_SITE_URL as an Environment Variable in Vercel to override
+  // Example: PUBLIC_SITE_URL=https://salarytohourlycalculators.vercel.app
+  // Falls back to production domain when not set
+  baseUrl: import.meta.env.PUBLIC_SITE_URL || 'https://salarytohourly.com',
   
   // Brand information
   siteName: 'Salary to Hourly Calculator',
