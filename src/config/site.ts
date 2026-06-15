@@ -5,7 +5,9 @@
 
 export const SITE_CONFIG = {
   // Base URL for the website
-  baseUrl: 'https://salarytohourly.com',
+  // Set PUBLIC_SITE_URL env var on Vercel/Cloudflare to override for preview deployments
+  // Falls back to production domain
+  baseUrl: import.meta.env.PUBLIC_SITE_URL || 'https://salarytohourly.com',
   
   // Brand information
   siteName: 'Salary to Hourly Calculator',
