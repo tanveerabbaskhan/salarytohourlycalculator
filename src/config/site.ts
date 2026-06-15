@@ -5,10 +5,9 @@
 
 export const SITE_CONFIG = {
   // Base URL for the website
-  // Set PUBLIC_SITE_URL as an Environment Variable in Vercel to override
-  // Example: PUBLIC_SITE_URL=https://salarytohourlycalculators.vercel.app
-  // Falls back to production domain when not set
-  baseUrl: import.meta.env.PUBLIC_SITE_URL || 'https://salarytohourly.com',
+  // For Vercel preview/deployment, set PUBLIC_SITE_URL env var
+  // Once you have your custom domain, change this URL
+  baseUrl: import.meta.env.PUBLIC_SITE_URL || 'https://salarytohourlycalculators.vercel.app',
   
   // Brand information
   siteName: 'Salary to Hourly Calculator',
